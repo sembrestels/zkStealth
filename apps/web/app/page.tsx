@@ -1,11 +1,14 @@
 "use client"
 import { useEffect, useState } from 'react';
 import { getMessageToSign, getStealthSafeAddress } from "@repo/fluidkey-utils";
+import { zkBobExample } from "@repo/zkbob-utils";
 import { useAccount, useSignMessage, usePublicClient } from 'wagmi';
 import { PinInput, PinInputField, HStack } from '@chakra-ui/react';
 import AddressTable from './components/AddressTable';
 
 const toNonce = 30;
+
+zkBobExample();
 
 export default function Page(): JSX.Element {
   const [results, setResults] = useState<{ nonce: bigint; stealthSafeAddress: string; }[]>([]);

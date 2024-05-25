@@ -1,0 +1,13 @@
+{
+    "name": "@repo/zkbob-utils",
+    "version": "0.0.0",
+    "private": true,
+    "main": "src/index.ts",
+    "dependencies": {
+      "zkbob-client-js": "^5.5.0",
+      "uuid": "^9.0.1"
+    },
+    "devDependencies": {
+      "@types/uuid": "^9.0.1"
+    }
+}

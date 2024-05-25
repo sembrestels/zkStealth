@@ -4,6 +4,7 @@
     "private": true,
     "main": "src/index.ts",
     "dependencies": {
-      "@fluidkey/stealth-account-kit": "^0.0.30"
+      "@fluidkey/stealth-account-kit": "^0.0.30",
+      "viem": "^2.1.0"
     }
 }
