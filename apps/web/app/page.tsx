@@ -1,41 +1,70 @@
 "use client"
 import { useEffect, useState } from 'react';
-  import { runExample } from "@repo/fluidkey-utils";
+import { getMessageToSign, getStealthSafeAddress } from "@repo/fluidkey-utils";
+import { useAccount, useSignMessage, usePublicClient } from 'wagmi';
+import { PinInput, PinInputField, HStack } from '@chakra-ui/react';
+import AddressTable from './components/AddressTable';
 
-  export default function Page(): JSX.Element {
-    const [results, setResults] = useState<{ nonce: bigint; stealthSafeAddress: string }[]>([]);
+const toNonce = 30;
 
-    useEffect(() => {
-      async function fetchResults() {
-        const exampleResults = await runExample();
-        setResults(exampleResults);
+export default function Page(): JSX.Element {
+  const [results, setResults] = useState<{ nonce: bigint; stealthSafeAddress: string; }[]>([]);
+  const [pin, setPin] = useState('');
+  const { signMessageAsync } = useSignMessage();
+  const account = useAccount();
+  const client = usePublicClient();
+  const chainId = client?.chain?.id;
+
+  useEffect(() => {
+    async function fetchResults() {
+      console.log('fetching', account.isConnected, account.address);
+      if (!account.isConnected || !account.address || !account.connector?.getProvider || pin.length !== 4) {
+        return;
       }
-      fetchResults();
-    }, []);
+      
+      const message = getMessageToSign({
+        address: account.address,
+        secret: pin
+      });
 
-    return (
-      <main>
-        Hello Anon
-        {results.length > 0 ? (
-          <table>
-            <thead>
-              <tr>
-                <th>Nonce</th>
-                <th>Stealth Safe Address</th>
-              </tr>
-            </thead>
-            <tbody>
-              {results.map(({ nonce, stealthSafeAddress }) => (
-                <tr key={nonce.toString()}>
-                  <td>{nonce.toString()}</td>
-                  <td>{stealthSafeAddress}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p>Loading...</p>
-        )}
-      </main>
-    );
-  }
+      const signature = await signMessageAsync({ message });
+      for (let nonce = 0; nonce < toNonce; nonce++) {
+        const stealthSafeAddress = await getStealthSafeAddress({ signature, nonce: BigInt(nonce), chainId: 0 });
+        
+        setResults(prevResults => [
+          ...prevResults,
+          {
+            nonce: BigInt(nonce),
+            stealthSafeAddress
+          }
+        ]);
+      }
+    }
+    fetchResults();
+  }, [signMessageAsync, account.address, account.isConnected, account.connector?.getProvider, chainId, pin]);
+
+  return (
+    <main>
+      Hello Anon
+      {!account.isConnected ? (
+        <p>Please connect your account to see your addresses.</p>
+      ) : (
+        <>
+          <HStack>
+            <PinInput value={pin} onChange={setPin} size="lg" otp>
+              <PinInputField />
+              <PinInputField />
+              <PinInputField />
+              <PinInputField />
+            </PinInput>
+          </HStack>
+          {results.length > 0 ? (
+            <AddressTable addresses={results} />
+          ) : (
+            <p>Loading...</p>
+          )}
+        </>
+      )}
+    </main>
+  );
+}

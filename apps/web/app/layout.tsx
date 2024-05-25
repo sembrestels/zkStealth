@@ -56,7 +56,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ChakraProvider theme={theme}>
-          <CSSReset />
+          
           <WagmiConfig>
           <Header />
                   <Box maxW="1280px" m="0 auto" p="2rem" textAlign="center">
