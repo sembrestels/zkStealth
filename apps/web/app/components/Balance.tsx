@@ -78,6 +78,7 @@ export function Balance({ address, privateKey, zkAddress }: { address: `0x${stri
             data: safeTxData
         });
         await waitForTransactionReceipt(client, { hash });
+        window.open("https://app.zkbob.com", "_blank");
     };
 
     return (
