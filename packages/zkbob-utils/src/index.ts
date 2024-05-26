@@ -1,6 +1,4 @@
-import { ZkBobClient, ClientConfig, AccountConfig,
-    ProverMode, TransferRequest, deriveSpendingKeyZkBob, TxType
-} from 'zkbob-client-js';
+import { ZkBobClient, ProverMode, deriveSpendingKeyZkBob } from 'zkbob-client-js';
 import md5 from 'js-md5';
 import clientConfig from './config';
 import { Mnemonic } from 'ethers/wallet';
@@ -17,7 +15,7 @@ export async function getZkBobClient(signedMessage: string): Promise<ZkBobClient
     if (sigV < 27) {
       throw new Error("Invalid signature")
     }
-    const newMnemonic = Mnemonic.entropyToPhrase(Uint8Array.from(md5.array(signedMessage)));
+    const newMnemonic = Mnemonic.entropyToPhrase(Uint8Array.from((md5 as any).array(signedMessage)));
 
     await client.login({
         sk: deriveSpendingKeyZkBob(newMnemonic),

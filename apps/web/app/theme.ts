@@ -6,8 +6,8 @@ import { extendTheme } from "@chakra-ui/react";
 const inter = Inter({ subsets: ["latin"] });
 const theme = extendTheme({
   fonts: {
-    heading: "Inter",
-    body: "Inter",
+    heading: inter.style.fontFamily,
+    body: inter.style.fontFamily,
   },
   colors: {
     primary: {

@@ -48,7 +48,6 @@ export default function Page(): JSX.Element {
         return;
       }
 
-      const newResults: { nonce: bigint; stealthSafeAddress: string; privateKey: string; zkAddress: string; }[] = [];
       for (let nonce = results.length; nonce < nonceCount; nonce++) {
         const [stealthSafeAddress, privateKey] = await getStealthSafeAddress({ signature, nonce: BigInt(nonce), chainId: 0 });
         const zkAddress = await zkBobClient.generateAddress();
