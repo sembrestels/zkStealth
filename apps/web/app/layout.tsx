@@ -1,25 +1,8 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import { Box, CSSReset, ChakraProvider, Flex } from "@chakra-ui/react";
 import WagmiConfig from "./components/WagmiConfig";
 import Header from "./components/Header";
-
-const inter = Inter({ subsets: ["latin"] });
-const theme = {
-  colors: {
-    primary: {
-      100: "#f0f0f0",
-      200: "#e0e0e0",
-      300: "#d0d0d0",
-      400: "#c0c0c0",
-      500: "#5bbad5",
-      600: "#408090",
-      700: "#307080",
-      800: "#206070",
-      900: "#105060",
-    },
-  },
-};
+import {theme} from "./theme";
 
 export const metadata: Metadata = {
   title: "zkStealth",
@@ -54,11 +37,11 @@ export default function RootLayout({
 }): JSX.Element {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body style={{ background: "white url('/bg.png') no-repeat center center fixed", backgroundSize: "20%" }}>
         <ChakraProvider theme={theme}>
-          
+          <CSSReset />
           <WagmiConfig>
-          <Header />
+            <Header />
                   <Box maxW="1280px" m="0 auto" p="2rem" textAlign="center">
                     <Flex justifyContent={"center"} my="4">
                       {children}

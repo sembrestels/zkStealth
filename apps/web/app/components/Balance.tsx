@@ -7,9 +7,8 @@ import { privateKeyToAccount } from "viem/accounts";
 const hydratorContract = "0x1a93629BFcc6E9c7241E587094FAE26F62503FaD";
 const depositContract = "0x318e2C1f5f6Ac4fDD5979E73D498342B255fC869";
 const estimatedFee = 200000000000000n;
-const sendTo = "zkbob_optimism_eth:GK4bwWpMw9puXUzVag6MTXPyYL4cXP8NCsrc8tFgDadL8ihTtfvEMSV7NQk6kTE";
 
-export function Balance({ address, privateKey }: { address: `0x${string}`, privateKey: `0x${string}` }) {
+export function Balance({ address, privateKey, zkAddress }: { address: `0x${string}`, privateKey: `0x${string}`; zkAddress: `0x${string}` }) {
     const balance = useBalance({ address });
     const { data: bytecode } = useBytecode({ address });
     const { sendTransactionAsync } = useSendTransaction();
@@ -42,7 +41,7 @@ export function Balance({ address, privateKey }: { address: `0x${string}`, priva
         const depositData = encodeFunctionData({
             abi: parseAbi(["function directNativeDeposit(address _fallbackUser,bytes _rawZkAddress) external"]),
             functionName: "directNativeDeposit",
-            args: [address, stringToHex(sendTo.split(":")[1] || "")],
+            args: [address, stringToHex(zkAddress.split(":")[1] || "")],
         });
 
         // encode the Safe multisig transaction
@@ -69,7 +68,7 @@ export function Balance({ address, privateKey }: { address: `0x${string}`, priva
                 to: account.address,
                 value: estimatedFee,
             });
-            await waitForTransactionReceipt(client, { hash: sendEthTx });
+            await waitForTransactionReceipt(client, { hash: sendEthTx, confirmations: 1 });
         }
 
         const hash = await walletClient.sendTransaction({
@@ -83,7 +82,7 @@ export function Balance({ address, privateKey }: { address: `0x${string}`, priva
 
     return (
         <Button onClick={handleClick} color={isContract ? "primary.700" : "black"}>
-            {formatUnits(balance.data?.value || 0n, 18)}
+            {balance.data?.value ? <>Send {formatUnits(balance.data.value, 18)} ETH to zkBob</> : <>0 ETH</>}
         </Button>
     );
 }

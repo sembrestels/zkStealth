@@ -5,9 +5,11 @@
     "main": "src/index.ts",
     "dependencies": {
       "zkbob-client-js": "^5.5.0",
-      "uuid": "^9.0.1"
+      "uuid": "^9.0.1",
+      "js-md5": "^0.8.3"
     },
     "devDependencies": {
-      "@types/uuid": "^9.0.1"
+      "@types/uuid": "^9.0.1",
+      "@types/js-md5": "^0.7.2"
     }
 }

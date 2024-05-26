@@ -1,18 +1,30 @@
 import { ZkBobClient, ClientConfig, AccountConfig,
     ProverMode, TransferRequest, deriveSpendingKeyZkBob, TxType
 } from 'zkbob-client-js';
+import md5 from 'js-md5';
 import clientConfig from './config';
+import { Mnemonic } from 'ethers/wallet';
+
+export function getMessageToSign() {
+    return 'Access zkBob account.\n\nOnly sign this message for a trusted client!';
+}
 
 
-export async function zkBobExample(): Promise<void> {
+export async function getZkBobClient(signedMessage: string): Promise<ZkBobClient> {
 
-    // creating a zkBob client without account to be worked on 'BOB-sepolia' pool
     const client = await ZkBobClient.create(clientConfig, 'WETH-optimism');
+    let sigV = parseInt(signedMessage.slice(-2), 16);
+    if (sigV < 27) {
+      throw new Error("Invalid signature")
+    }
+    const newMnemonic = Mnemonic.entropyToPhrase(Uint8Array.from(md5.array(signedMessage)));
 
-    // now you can get relayer fee or pool limits for example
-    const depositFee = await client.atomicTxFee(TxType.BridgeDeposit);
-    console.log(`Relayer deposit fee: ${depositFee} Gwei`);
-    console.log(`Pool deposit total limit: ${(await client.getLimits(undefined)).deposit.total} Gwei`);
+    await client.login({
+        sk: deriveSpendingKeyZkBob(newMnemonic),
+        pool: 'WETH-optimism',
+        birthindex: 0,
+        proverMode: ProverMode.Local,
+    })
 
     // now let's attach account generated from the arbitrary 12-words mnemonic:
     // const mnemonic = 'magic trophy foil direct marriage glad bench wash doctor risk end cheap';
@@ -29,12 +41,13 @@ export async function zkBobExample(): Promise<void> {
     // };
     // await client.login(accountConfig);
 
-    // // now the client is ready to send transactions, but let's get an account balance first
-    // // account state will be synced under-the-hood (pass false to getTotalBalance to prevent sync)
+    // now the client is ready to send transactions, but let's get an account balance first
+    // account state will be synced under-the-hood (pass false to getTotalBalance to prevent sync)
     // console.log(`Shielded account balance: ${await client.getTotalBalance()} Gwei`);
 
-    // // let's generate our zkAddress to request a few tokens from somebody
-    // console.log(`My zk address: ${await client.generateAddress()}`);
+    // let's generate our zkAddress to request a few tokens from somebody
+    // const zkAddress = await client.generateAddress();
+    // console.log(`My zk address: ${zkAddress}`);
 
     // // and now let's transfer a few tokens inside the pool
     // const tx: TransferRequest = {
@@ -49,5 +62,6 @@ export async function zkBobExample(): Promise<void> {
     // console.log(`${result.map((t) => `job #${t.jobId}: ${t.txHash}]`).join(`\n`)}`);
 
     // // to close all connections to the indexed DBs invoke logout method:
-    await client.logout();
+    // await client.logout();
+    return client;
 }
