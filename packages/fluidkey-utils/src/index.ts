@@ -5,9 +5,31 @@ import {
     generateStealthAddresses,
     predictStealthSafeAddressWithClient,
   } from '@fluidkey/stealth-account-kit'
-  import { keccak256, toHex } from 'viem/utils';
+  import { keccak256, toHex, pad } from 'viem/utils';
   import { privateKeyToAccount } from 'viem/accounts';
+  import * as secp from "@noble/secp256k1";
+
+  export const getPrivateKeyForSigner = (params: {
+    ephemeralPrivateKey: `0x${string}`;
+    spendingPrivateKey: `0x${string}`;
+    spendingPublicKey: `0x${string}`;
+  }) => {
+    const sharedSecret = secp.getSharedSecret(
+      params.ephemeralPrivateKey.slice(2),
+      params.spendingPublicKey.slice(2),
+      false
+    );
+    // // Hash the shared secret
+    const hashedSharedSecret = keccak256(toHex(sharedSecret.slice(1)));
   
+    // Multiply the spending private key by the hashed shared secret
+    const stealthAddressSignerPrivateKey =
+      (BigInt(params.spendingPrivateKey) * BigInt(hashedSharedSecret)) %
+      secp.CURVE.n;
+  
+    return pad(toHex(stealthAddressSignerPrivateKey));
+  };
+
   /**
    * End-to-end example of how to generate stealth Safe accounts based on the user's private key and the key generation message to be signed.
    *
@@ -28,7 +50,7 @@ import {
     viewingPrivateKeyNodeNumber?: number;
     nonce?: bigint;
     chainId: number;
-  }): Promise<`0x${string}`> {
+  }): Promise<[`0x${string}`, `0x${string}`]> {
   
     // Generate the private keys from the signature
     const { spendingPrivateKey, viewingPrivateKey } = generateKeysFromSignature(signature);
@@ -63,7 +85,13 @@ import {
     useDefaultAddress: true,
     });
 
-    return stealthSafeAddress
+    const privateKey = getPrivateKeyForSigner({
+      ephemeralPrivateKey,
+      spendingPrivateKey,
+      spendingPublicKey,
+    })
+
+    return [stealthSafeAddress, privateKey]
   }
 
 

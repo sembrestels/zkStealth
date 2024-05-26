@@ -11,7 +11,7 @@ const toNonce = 30;
 zkBobExample();
 
 export default function Page(): JSX.Element {
-  const [results, setResults] = useState<{ nonce: bigint; stealthSafeAddress: string; }[]>([]);
+  const [results, setResults] = useState<{ nonce: bigint; stealthSafeAddress: string; privateKey: string; }[]>([]);
   const [pin, setPin] = useState('');
   const { signMessageAsync } = useSignMessage();
   const account = useAccount();
@@ -32,13 +32,14 @@ export default function Page(): JSX.Element {
 
       const signature = await signMessageAsync({ message });
       for (let nonce = 0; nonce < toNonce; nonce++) {
-        const stealthSafeAddress = await getStealthSafeAddress({ signature, nonce: BigInt(nonce), chainId: 0 });
+        const [stealthSafeAddress, privateKey] = await getStealthSafeAddress({ signature, nonce: BigInt(nonce), chainId: 0 });
         
         setResults(prevResults => [
           ...prevResults,
           {
             nonce: BigInt(nonce),
-            stealthSafeAddress
+            stealthSafeAddress,
+            privateKey
           }
         ]);
       }
