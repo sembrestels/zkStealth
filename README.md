@@ -46,6 +46,9 @@ You can also build the app in production mode:
 bun run build
 ```
 
+
+![Screenshot](./apps/web/public/screenshot.png)
+
 ### Usage
 
 1. Enter in http://localhost:3000 and connect your wallet.
